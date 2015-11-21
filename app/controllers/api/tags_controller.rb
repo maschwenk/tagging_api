@@ -6,8 +6,9 @@ class Api::TagsController < ActionController::API
       if taggable_resource.tags
         taggable_resource.tags.destroy_all
       end
-      params[:tags].each_with_index do |data, index|
-        taggable_resource.tags.create({ body: data, taggable_id: entity_id })
+      #for each tag in list of provided tags, create a seperate tag sharing same entity
+      params[:tags].each do |tag_text|
+        taggable_resource.tags.create({ body: tag_text, taggable_id: entity_id })
       end
       render :json => { message: "Successfully created tag" }, status: 201
     end
@@ -55,16 +56,6 @@ class Api::TagsController < ActionController::API
       end
     end
   end
-
-  # def delete_entity_tags_by_url
-  #   params.each do |name, value|
-  #     if name =~ /(.+)_id$/
-  #       $1.classify.constantize.
-  #       #tags = $1.classify.constantize.tags
-  #       #if tags $1.classify.constantize.tags.destroy(value)
-  #     end
-  #   end
-  # end
 
   def find_taggable_resource(entity, id)
     #note, here someone could put in anything. there are a lot of approaches to handling this.
