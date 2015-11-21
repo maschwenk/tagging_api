@@ -20,7 +20,7 @@ describe "Tags API" do
 
       expect(response.status).to eq 201 #created
 
-      expect(Tag.where(taggable_id: product.id)).to match_array(["Boring", "Orange", "Silly", "Dumb", "Boring"])
+      expect(Tag.where(taggable_id: product.id).map do |tag| tag.body end).to match_array(["Boring", "Orange", "Silly", "Dumb", "Boring"])
 
 
     end
@@ -28,9 +28,9 @@ describe "Tags API" do
   describe "GET /:entity_type/:entity_id/tags " do
     it "returns JSON of entity and its tags" do
       tags = [ "Dangerous", "Sucks" ]
-      FactoryGirl.create :product
-      FactoryGirl.create :tag, taggable_id: 1, taggable_type: "Product", body: tags[0]
-      FactoryGirl.create :tag, taggable_id: 1, taggable_type: "Product", body: tags[1]
+      product = FactoryGirl.create :product
+      FactoryGirl.create :tag, taggable_id: product.id, taggable_type: "Product", body: tags[0]
+      FactoryGirl.create :tag, taggable_id: product.id, taggable_type: "Product", body: tags[1]
 
       request_headers = { "Accept" => "application/json" }
       get "/api/products/1/tags" , {} , request_headers
@@ -42,23 +42,23 @@ describe "Tags API" do
     end
   end
 
-  describe "DELETE /:entity_type/:entity_id/tags " do
+  describe "DELETE /:entity_type/:entity_id/tags/destroy_all " do
     #I don't think this api here makes sense really. Why would you want to delete the entity AND tags on this route.
     #I have modified to make it just delete the tags of the route. Would love to discuss my reasoning.
 
     it "completely removes tags of given entity" do
       tags = [ "Dangerous", "Sucks" ]
-      FactoryGirl.create :product
-      FactoryGirl.create :tag, taggable_id: 1, taggable_type: "Product", body: tags[0]
-      FactoryGirl.create :tag, taggable_id: 1, taggable_type: "Product", body: tags[1]
+      product = FactoryGirl.create :product
+      FactoryGirl.create :tag, taggable_id: product.id, taggable_type: "Product", body: tags[0]
+      FactoryGirl.create :tag, taggable_id: product.id, taggable_type: "Product", body: tags[1]
 
       request_headers = { "Accept" => "application/json" }
 
-      delete "/api/products/1/tags" , {} , request_headers
+      delete "/api/products/1/tags/destroy_all" , {} , request_headers
 
       expect(response.status).to eq 204 #delete success
 
-      expect(Product.find(1).tags).to be_nil
+      expect(Product.find(product.id).tags.length).to be 0
     end
   end
 
